@@ -7,8 +7,8 @@ class YouTube
 	public string $author = '';
 	public string $category = '';
 	public string $description = '';
-	public string $date_upload = '';
-	public string $date_publish = '';
+	public string $upload_date = '';
+	public string $publish_date = '';
 	
 	public int $views = 0;
 	public int $rating = 0;
@@ -20,37 +20,46 @@ class YouTube
 	
 	private array $actions = array();
 	
-	public function __construct(string $v)
+	/**
+	 * Set all object properties
+	 *
+	 * @param string $id YouTube video id
+	 */
+	
+	public function __construct(string $id)
 	{
-		if(($contents = file_get_contents('https://www.youtube.com/watch?v='.$v)) !== false)
+		if($contents = file_get_contents('https://www.youtube.com/watch?v='.$id))
 		{
-			if(preg_match('#ytplayer\.config = (\{.+\});#U', $contents, $match) !== false)
+			if(preg_match('#ytplayer\.config = (\{.+\});#U', $contents, $match))
 			{
-				if(($config = json_decode($match[1])) !== false)
+				if(!is_null($config = json_decode($match[1])))
 				{
-					$this->setActions('https://www.youtube.com'.$config->assets->js);
-					
-					if(($config = json_decode($config->args->player_response)) !== false)
+					if(!empty($config->assets->js))
 					{
-						$this->id = $config->videoDetails->videoId;
-						$this->title = $config->videoDetails->title;
-						$this->author = $config->videoDetails->author;
-						$this->category = $config->microformat->playerMicroformatRenderer->category;
-						$this->description = $config->videoDetails->shortDescription;
+						$this->setActions('https://www.youtube.com'.$config->assets->js);
+					}
+					
+					if(!is_null($config = json_decode($this->get($config->args->player_response))))
+					{
+						$this->id = $this->get($config->videoDetails->videoId);
+						$this->title = $this->get($config->videoDetails->title);
+						$this->author = $this->get($config->videoDetails->author);
+						$this->category = $this->get($config->microformat->playerMicroformatRenderer->category);
+						$this->description = $this->get($config->videoDetails->shortDescription);
 						
-						$this->date_upload = $config->microformat->playerMicroformatRenderer->uploadDate;
-						$this->date_publish = $config->microformat->playerMicroformatRenderer->publishDate;
+						$this->upload_date = $this->get($config->microformat->playerMicroformatRenderer->uploadDate);
+						$this->publish_date = $this->get($config->microformat->playerMicroformatRenderer->publishDate);
 						
-						$this->keywords = $config->videoDetails->keywords;
+						$this->keywords = $this->get($config->videoDetails->keywords);
 						
-						$this->views = $config->videoDetails->viewCount;
-						$this->rating = $config->videoDetails->averageRating;
-						$this->duration = $config->videoDetails->lengthSeconds;
+						$this->views = $this->get($config->videoDetails->viewCount);
+						$this->rating = $this->get($config->videoDetails->averageRating);
+						$this->duration = $this->get($config->videoDetails->lengthSeconds);
 						
-						$this->thumbnails = $config->videoDetails->thumbnail->thumbnails;
+						$this->thumbnails = $this->get($config->videoDetails->thumbnail->thumbnails);
 						
-						$this->setVideos($config->streamingData->formats);
-						$this->setVideos($config->streamingData->adaptiveFormats);
+						$this->setVideos($this->get($config->streamingData->formats, []));
+						$this->setVideos($this->get($config->streamingData->adaptiveFormats, []));
 					}
 				}
 			}
@@ -58,37 +67,49 @@ class YouTube
 	}
 	
 	/**
+	 * Get value if is set else default
+	 *
+	 * @param $value
+	 * @param $default
+	 */
+	
+	private function get(&$value, $default = null)
+	{
+		return isset($value) ? $value : $default;
+	}
+	
+	/**
 	 * Defines necessary actions to cipher the signature
 	 *
-	 * @param string $url YouTube JavaScript URL
+	 * @param string $url YouTube javascript url
 	 */
 	
 	private function setActions(string $url): void
 	{
-		if(($contents = file_get_contents($url)) !== false)
+		if($contents = file_get_contents($url))
 		{
 			$function = new stdClass;
 			
-			if(preg_match('#([A-Za-z0-9]+):function\(a\)\{a\.reverse\(\)\}#', $contents, $match) !== false)
+			if(preg_match('#([A-Za-z0-9]+):function\(a\)\{a\.reverse\(\)\}#', $contents, $match))
 			{
 				$function->{$match[1]} = 'reverse';
 			}
 			
-			if(preg_match('#([A-Za-z0-9]+):function\(a,b\)\{a\.splice\(0,b\)\}#', $contents, $match) !== false)
+			if(preg_match('#([A-Za-z0-9]+):function\(a,b\)\{a\.splice\(0,b\)\}#', $contents, $match))
 			{
 				$function->{$match[1]} = 'slice';
 			}
 			
-			if(preg_match('#([A-Za-z0-9]+):function\(a,b\)\{var c=a\[0\];a\[0\]=a\[b%a\.length\];a\[b%a\.length\]=c\}#', $contents, $match) !== false) 
+			if(preg_match('#([A-Za-z0-9]+):function\(a,b\)\{var c=a\[0\];a\[0\]=a\[b%a\.length\];a\[b%a\.length\]=c\}#', $contents, $match)) 
 			{
 				$function->{$match[1]} = 'swap';
 			}
 			
-			if(preg_match('#=([A-Za-z]+)\(decodeURIComponent#', $contents, $match) !== false)
+			if(preg_match('#=([A-Za-z]+)\(decodeURIComponent#', $contents, $match))
 			{
-				if(preg_match('#'.$match[1].'=function\(a\)\{a=a\.split\(""\);([^\}]+)return a\.join\(""\)}#', $contents, $match) !== false)
+				if(preg_match('#'.$match[1].'=function\(a\)\{a=a\.split\(""\);([^\}]+)return a\.join\(""\)}#', $contents, $match))
 				{
-					if(preg_match_all('#[A-Za-z0-9]+\.([A-Za-z0-9]+)\(a,([0-9]+)\)#', $match[1], $match) !== false)
+					if(preg_match_all('#[A-Za-z0-9]+\.([A-Za-z0-9]+)\(a,([0-9]+)\)#', $match[1], $match))
 					{
 						foreach($match[0] as $key => $temp)
 						{
@@ -115,25 +136,40 @@ class YouTube
 	{
 		foreach($formats as $format)
 		{
-			parse_str($format->cipher, $data);
-			
 			$video = new stdClass;
 			
-			$video->url = $data['url'].'&'.$data['sp'].'='.$this->cipher($data['s']);
-			$video->itag = $format->itag;
-			$video->lenght = $format->contentLength;
-			$video->mime_type = $format->mimeType;
-			
-			if(!isset($format->qualityLabel))
+			if(!empty($format->cipher))
 			{
-				$video->type = 'audio';
+				parse_str($format->cipher, $data);
+				
+				if(!empty($data['url']) && !empty($data['sp']) && !empty($data['s']))
+				{
+					$video->url = $data['url'].'&'.$data['sp'].'='.$this->cipher($data['s']);
+				}
+				else $video->url = null;
 			}
 			else
 			{
+				$video->url = $this->get($format->url);
+			}
+			
+			$video->itag = $this->get($format->itag);
+			$video->lenght = $this->get($format->contentLength);
+			$video->mime_type = $this->get($format->mimeType);
+			
+			if(isset($format->qualityLabel))
+			{
 				$video->type = isset($format->audioQuality) ? 'video' : 'mute-video';
-				$video->width = $format->width;
-				$video->height = $format->height;
-				$video->quality = $format->qualityLabel;
+				$video->width = $this->get($format->width);
+				$video->height = $this->get($format->height);
+				$video->quality = $this->get($format->qualityLabel);
+			}
+			else
+			{
+				$video->type = 'audio';
+				$video->width = null;
+				$video->height = null;
+				$video->quality = null;
 			}
 			
 			$this->videos[] = $video;
