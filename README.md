@@ -1,8 +1,8 @@
 # YouTube PHP Class
 
-A simple PHP class which allows you to retrieve information relating to the different formats of a YouTube video and their download URLs.
-The numerous and frequent changes to the ciphering algorithm of the YouTube videos signatures are also managed automatically.
-The proper functioning of the class can obviously be impacted by significant new modifications of the YouTube security system
+A simple PHP class which grab YouTube video informations including media URLs.
+The frequent changes of the JavaScript ciphering algorithm are managed automatically.
+The class behavior can obviously be impacted by new modifications of the security system.
 
 ## Getting Started
 
