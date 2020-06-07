@@ -138,9 +138,9 @@ class YouTube
 		{
 			$video = new stdClass;
 			
-			if(!empty($format->cipher))
+			if(!empty($format->signatureCipher))
 			{
-				parse_str($format->cipher, $data);
+				parse_str($format->signatureCipher, $data);
 				
 				if(!empty($data['url']) && !empty($data['sp']) && !empty($data['s']))
 				{
