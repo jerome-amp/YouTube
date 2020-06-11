@@ -9,7 +9,7 @@ The class behavior can obviously be impacted by new modifications of the securit
 ### Prerequisites
 
 ```
-PHP 7.4.4 or higher ( Remove type hinting for older versions )
+PHP 7.4+
 ```
 
 ### Use of class
