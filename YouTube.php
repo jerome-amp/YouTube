@@ -14,11 +14,11 @@ class YouTube
 	public int $rating = 0;
 	public int $duration = 0;
 	
-	public array $videos = array();
-	public array $keywords = array();
-	public array $thumbnails = array();
+	public array $videos = [];
+	public array $keywords = [];
+	public array $thumbnails = [];
 	
-	private array $actions = array();
+	private array $actions = [];
 	
 	/**
 	 * Set all object properties
@@ -50,13 +50,13 @@ class YouTube
 						$this->upload_date = $this->get($config->microformat->playerMicroformatRenderer->uploadDate);
 						$this->publish_date = $this->get($config->microformat->playerMicroformatRenderer->publishDate);
 						
-						$this->keywords = $this->get($config->videoDetails->keywords);
+						$this->keywords = $this->get($config->videoDetails->keywords, []);
 						
 						$this->views = $this->get($config->videoDetails->viewCount);
 						$this->rating = $this->get($config->videoDetails->averageRating);
 						$this->duration = $this->get($config->videoDetails->lengthSeconds);
 						
-						$this->thumbnails = $this->get($config->videoDetails->thumbnail->thumbnails);
+						$this->thumbnails = $this->get($config->videoDetails->thumbnail->thumbnails, []);
 						
 						$this->setVideos($this->get($config->streamingData->formats, []));
 						$this->setVideos($this->get($config->streamingData->adaptiveFormats, []));
