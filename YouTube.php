@@ -34,9 +34,9 @@ class YouTube
 			{
 				if(!is_null($config = json_decode($match[1])))
 				{
-					if(!empty($config->assets->js))
+					if(preg_match('#"jsUrl":"([^"]+)"#', $contents, $match))
 					{
-						$this->setActions('https://www.youtube.com'.$config->assets->js);
+						$this->setActions('https://www.youtube.com'.$match[1]);
 					}
 					
 					if(!is_null($config = json_decode($this->get($config->args->player_response))))
