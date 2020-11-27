@@ -30,7 +30,7 @@ class YouTube
 	{
 		if($contents = file_get_contents('https://www.youtube.com/watch?v='.$id))
 		{
-			if(preg_match('#ytplayer\.config = (\{.+\});#U', $contents, $match))
+			if(preg_match('#ytInitialPlayerResponse = (\{.+\});#U', $contents, $match))
 			{
 				if(!is_null($config = json_decode($match[1])))
 				{
@@ -39,28 +39,25 @@ class YouTube
 						$this->setActions('https://www.youtube.com'.$match[1]);
 					}
 					
-					if(!is_null($config = json_decode($this->get($config->args->player_response))))
-					{
-						$this->id = $this->get($config->videoDetails->videoId);
-						$this->title = $this->get($config->videoDetails->title);
-						$this->author = $this->get($config->videoDetails->author);
-						$this->category = $this->get($config->microformat->playerMicroformatRenderer->category);
-						$this->description = $this->get($config->videoDetails->shortDescription);
-						
-						$this->upload_date = $this->get($config->microformat->playerMicroformatRenderer->uploadDate);
-						$this->publish_date = $this->get($config->microformat->playerMicroformatRenderer->publishDate);
-						
-						$this->keywords = $this->get($config->videoDetails->keywords, []);
-						
-						$this->views = $this->get($config->videoDetails->viewCount);
-						$this->rating = $this->get($config->videoDetails->averageRating);
-						$this->duration = $this->get($config->videoDetails->lengthSeconds);
-						
-						$this->thumbnails = $this->get($config->videoDetails->thumbnail->thumbnails, []);
-						
-						$this->setVideos($this->get($config->streamingData->formats, []));
-						$this->setVideos($this->get($config->streamingData->adaptiveFormats, []));
-					}
+					$this->id = $this->get($config->videoDetails->videoId);
+					$this->title = $this->get($config->videoDetails->title);
+					$this->author = $this->get($config->videoDetails->author);
+					$this->category = $this->get($config->microformat->playerMicroformatRenderer->category);
+					$this->description = $this->get($config->videoDetails->shortDescription);
+					
+					$this->upload_date = $this->get($config->microformat->playerMicroformatRenderer->uploadDate);
+					$this->publish_date = $this->get($config->microformat->playerMicroformatRenderer->publishDate);
+					
+					$this->keywords = $this->get($config->videoDetails->keywords, []);
+					
+					$this->views = $this->get($config->videoDetails->viewCount);
+					$this->rating = $this->get($config->videoDetails->averageRating);
+					$this->duration = $this->get($config->videoDetails->lengthSeconds);
+					
+					$this->thumbnails = $this->get($config->videoDetails->thumbnail->thumbnails, []);
+					
+					$this->setVideos($this->get($config->streamingData->formats, []));
+					$this->setVideos($this->get($config->streamingData->adaptiveFormats, []));
 				}
 			}
 		}
