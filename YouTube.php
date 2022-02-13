@@ -39,40 +39,43 @@ class YouTube
 						$this->setActions('https://www.youtube.com'.$match[1]);
 					}
 					
-					$this->id = $this->get($config->videoDetails->videoId);
-					$this->title = $this->get($config->videoDetails->title);
-					$this->author = $this->get($config->videoDetails->author);
-					$this->category = $this->get($config->microformat->playerMicroformatRenderer->category);
-					$this->description = $this->get($config->videoDetails->shortDescription);
+					$this->set('id', $config->videoDetails->videoId);
+					$this->set('title', $config->videoDetails->title);
+					$this->set('author', $config->videoDetails->author);
+					$this->set('category', $config->microformat->playerMicroformatRenderer->category);
+					$this->set('description', $config->videoDetails->shortDescription);
 					
-					$this->upload_date = $this->get($config->microformat->playerMicroformatRenderer->uploadDate);
-					$this->publish_date = $this->get($config->microformat->playerMicroformatRenderer->publishDate);
+					$this->set('upload_date', $config->microformat->playerMicroformatRenderer->uploadDate);
+					$this->set('publish_date', $config->microformat->playerMicroformatRenderer->publishDate);
 					
-					$this->keywords = $this->get($config->videoDetails->keywords, []);
+					$this->set('keywords', $config->videoDetails->keywords);
 					
-					$this->views = $this->get($config->videoDetails->viewCount);
-					$this->rating = $this->get($config->videoDetails->averageRating);
-					$this->duration = $this->get($config->videoDetails->lengthSeconds);
+					$this->set('views', $config->videoDetails->viewCount);
+					$this->set('rating', $config->videoDetails->averageRating);
+					$this->set('duration', $config->videoDetails->lengthSeconds);
 					
-					$this->thumbnails = $this->get($config->videoDetails->thumbnail->thumbnails, []);
+					$this->set('thumbnails', $config->videoDetails->thumbnail->thumbnails);
 					
-					$this->setVideos($this->get($config->streamingData->formats, []));
-					$this->setVideos($this->get($config->streamingData->adaptiveFormats, []));
+					$this->setVideos($config->streamingData->formats ?: []);
+					$this->setVideos($config->streamingData->adaptiveFormats ?: []);
 				}
 			}
 		}
 	}
 	
 	/**
-	 * Get value if is set else default
+	 * Set value if is set
 	 *
+	 * @param $name
 	 * @param $value
-	 * @param $default
 	 */
 	
-	private function get(&$value, $default = null)
+	private function set(string $name, &$value): void
 	{
-		return isset($value) ? $value : $default;
+		if(isset($value))
+		{
+			$this->$name = $value;
+		}
 	}
 	
 	/**
@@ -147,19 +150,19 @@ class YouTube
 			}
 			else
 			{
-				$video->url = $this->get($format->url);
+				$video->url = $format->url;
 			}
 			
-			$video->itag = $this->get($format->itag);
-			$video->lenght = $this->get($format->contentLength);
-			$video->mime_type = $this->get($format->mimeType);
+			$video->itag = $format->itag;
+			$video->lenght = $format->contentLength;
+			$video->mime_type = $format->mimeType;
 			
 			if(isset($format->qualityLabel))
 			{
 				$video->type = isset($format->audioQuality) ? 'video' : 'mute-video';
-				$video->width = $this->get($format->width);
-				$video->height = $this->get($format->height);
-				$video->quality = $this->get($format->qualityLabel);
+				$video->width = $format->width;
+				$video->height = $format->height;
+				$video->quality = $format->qualityLabel;
 			}
 			else
 			{
