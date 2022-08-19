@@ -20,12 +20,6 @@ class YouTube
 	
 	private array $actions = [];
 	
-	/**
-	 * Set all object properties
-	 *
-	 * @param string $id YouTube video id
-	 */
-	
 	public function __construct(string $id)
 	{
 		if($contents = file_get_contents('https://www.youtube.com/watch?v='.$id))
@@ -63,26 +57,13 @@ class YouTube
 		}
 	}
 	
-	/**
-	 * Set value if is set
-	 *
-	 * @param $name
-	 * @param $value
-	 */
-	
-	private function set(string $name, &$value): void
+	private function set(string $name, int|array|string|null &$value): void
 	{
 		if(isset($value))
 		{
 			$this->$name = $value;
 		}
 	}
-	
-	/**
-	 * Defines necessary actions to cipher the signature
-	 *
-	 * @param string $url YouTube javascript url
-	 */
 	
 	private function setActions(string $url): void
 	{
@@ -125,12 +106,6 @@ class YouTube
 			}
 		}
 	}
-	
-	/**
-	 * Defines videos property from different YouTube video formats
-	 *
-	 * @param array $formats YouTube video formats
-	 */
 	
 	private function setVideos(array $formats): void
 	{
@@ -175,12 +150,6 @@ class YouTube
 			$this->videos[] = $video;
 		}
 	}
-	
-	/**
-	 * Ciphers the YouTube video signature by applying different actions
-	 *
-	 * @param string $signature YouTube video signature
-	 */
 	
 	private function cipher(string $signature): string
 	{

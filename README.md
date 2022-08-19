@@ -1,18 +1,4 @@
-# YouTube PHP Class
-
-A simple PHP class which grab YouTube video informations including media URLs.
-The frequent changes of the JavaScript ciphering algorithm are managed automatically.
-The class behavior can obviously be impacted by new modifications of the security system.
-
-## Getting Started
-
-### Prerequisites
-
-```
-PHP 7.4+
-```
-
-### Use of class
+# YouTube
 
 ```
 
@@ -26,7 +12,7 @@ var_dump($youtube);
 
 ## Author
 
-* **Jérôme Taillandier**
+**Jérôme Taillandier**
 
 ## License
 
