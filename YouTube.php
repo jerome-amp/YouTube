@@ -50,8 +50,8 @@ class YouTube
 					
 					$this->set('thumbnails', $config->videoDetails->thumbnail->thumbnails);
 					
-					$this->setVideos($config->streamingData->formats ?: []);
-					$this->setVideos($config->streamingData->adaptiveFormats ?: []);
+					$this->setVideos($config->streamingData->formats ?? []);
+					$this->setVideos($config->streamingData->adaptiveFormats ?? []);
 				}
 			}
 		}
@@ -129,7 +129,7 @@ class YouTube
 			}
 			
 			$video->itag = $format->itag;
-			$video->lenght = $format->contentLength;
+			$video->lenght = $format->contentLength ?? 0;
 			$video->mime_type = $format->mimeType;
 			
 			if(isset($format->qualityLabel))
