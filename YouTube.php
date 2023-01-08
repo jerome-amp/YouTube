@@ -86,9 +86,9 @@ class YouTube
 				$function->{$match[1]} = 'swap';
 			}
 			
-			if(preg_match('#=([A-Za-z]+)\(decodeURIComponent#', $contents, $match))
+			if(preg_match('#=([A-Za-z\$]+)\(decodeURIComponent#', $contents, $match))
 			{
-				if(preg_match('#'.$match[1].'=function\(a\)\{a=a\.split\(""\);([^\}]+)return a\.join\(""\)}#', $contents, $match))
+				if(preg_match('#'.str_replace('$', '\$', $match[1]).'=function\(a\)\{a=a\.split\(""\);([^\}]+)return a\.join\(""\)}#', $contents, $match))
 				{
 					if(preg_match_all('#[A-Za-z0-9]+\.([A-Za-z0-9]+)\(a,([0-9]+)\)#', $match[1], $match))
 					{
