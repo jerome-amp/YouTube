@@ -69,34 +69,36 @@ class YouTube
 	{
 		if($contents = file_get_contents($url))
 		{
-			$function = new stdClass;
-			
-			if(preg_match('#([A-Za-z0-9]+):function\(a\)\{a\.reverse\(\)\}#', $contents, $match))
+			if(preg_match('#\'use strict\';var ([A-Za-z0-9]+)="([^"]+)"\.split\("([^"]+)"\)#', $contents, $match))
 			{
-				$function->{$match[1]} = 'reverse';
-			}
-			
-			if(preg_match('#([A-Za-z0-9]+):function\(a,b\)\{a\.splice\(0,b\)\}#', $contents, $match))
-			{
-				$function->{$match[1]} = 'slice';
-			}
-			
-			if(preg_match('#([A-Za-z0-9]+):function\(a,b\)\{var c=a\[0\];a\[0\]=a\[b%a\.length\];a\[b%a\.length\]=c\}#', $contents, $match)) 
-			{
-				$function->{$match[1]} = 'swap';
-			}
-			
-			if(preg_match('#=([A-Za-z\$]+)\(decodeURIComponent#', $contents, $match))
-			{
-				if(preg_match('#'.str_replace('$', '\$', $match[1]).'=function\(a\)\{a=a\.split\(""\);([^\}]+)return a\.join\(""\)}#', $contents, $match))
+				$index = $match[1];
+				$values = explode($match[3], $match[2]);
+				$keys = array_flip($values);
+				
+				if(preg_match('#([A-Za-z0-9]+):function\(([^\)]+)\)\{\2\['.$index.'\['.$keys['reverse'].'\]\]\(\)\}#', $contents, $match))
 				{
-					if(preg_match_all('#[A-Za-z0-9]+\.([A-Za-z0-9]+)\(a,([0-9]+)\)#', $match[1], $match))
+					$actions[$match[1]] = 'reverse';
+				}
+				
+				if(preg_match('#([A-Za-z0-9]+):function\(([^,]+),([^\)]+)\)\{\2\['.$index.'\['.$keys['splice'].'\]\]\(0,\3\)\}\}#', $contents, $match))
+				{
+					$actions[$match[1]] = 'splice';
+				}
+				
+				if(preg_match('#([A-Za-z0-9]+):function\(([^,]+),([^\)]+)\)\{var ([^=]+)=\2\[0\];\2\[0\]=\2\[\3%\2\[z\[9\]\]\];\2\[\3%\2\[z\[9\]\]\]=\4\}#', $contents, $match))
+				{
+					$actions[$match[1]] = 'swap';
+				}
+				
+				if(preg_match('#\['.$index.'\['.$keys['split'].'\]\]\('.$index.'\['.$keys[''].'\]\);(.*)return#', $contents, $match))
+				{
+					if(preg_match_all('#\['.$index.'\[([0-9]+)\]\]\([^,]+,([0-9]+)\)#', $match[1], $match))
 					{
 						foreach($match[0] as $key => $temp)
 						{
 							$action = new stdClass;
 							
-							$action->name = $function->{$match[1][$key]};
+							$action->name = $actions[$values[$match[1][$key]]];
 							$action->value = $match[2][$key];
 							
 							$this->actions[] = $action;
