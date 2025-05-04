@@ -69,7 +69,7 @@ class YouTube
 	{
 		if($contents = file_get_contents($url))
 		{
-			if(preg_match('#\'use strict\';var ([A-Za-z0-9]+)="([^"]+)"\.split\("([^"]+)"\)#', $contents, $match))
+			if(preg_match('#\'use strict\';var ([A-Za-z0-9]+)="(.+)"\.split\("([^"]+)"\)#', $contents, $match))
 			{
 				$index = $match[1];
 				$values = explode($match[3], $match[2]);
@@ -80,12 +80,12 @@ class YouTube
 					$actions[$match[1]] = 'reverse';
 				}
 				
-				if(preg_match('#([A-Za-z0-9]+):function\(([^,]+),([^\)]+)\)\{\2\['.$index.'\['.$keys['splice'].'\]\]\(0,\3\)\}\}#', $contents, $match))
+				if(preg_match('#([A-Za-z0-9]+):function\(([^,]+),([^\)]+)\)\{\2\['.$index.'\['.$keys['splice'].'\]\]\(0,\3\)\}#', $contents, $match))
 				{
 					$actions[$match[1]] = 'splice';
 				}
 				
-				if(preg_match('#([A-Za-z0-9]+):function\(([^,]+),([^\)]+)\)\{var ([^=]+)=\2\[0\];\2\[0\]=\2\[\3%\2\[z\[9\]\]\];\2\[\3%\2\[z\[9\]\]\]=\4\}#', $contents, $match))
+				if(preg_match('#([A-Za-z0-9]+):function\(([^,]+),([^\)]+)\)\{var ([^=]+)=\2\[0\];\2\[0\]=\2\[\3%\2\['.$index.'\['.$keys['length'].'\]\]\];\2\[\3%\2\['.$index.'\['.$keys['length'].'\]\]\]=\4\}#', $contents, $match))
 				{
 					$actions[$match[1]] = 'swap';
 				}
@@ -121,7 +121,7 @@ class YouTube
 				
 				if(!empty($data['url']) && !empty($data['sp']) && !empty($data['s']))
 				{
-					$video->url = $data['url'].'&'.$data['sp'].'='.$this->cipher($data['s']);
+					$video->url = $data['url'].'&'.$data['sp'].'='.urlencode($this->cipher($data['s']));
 				}
 				else $video->url = null;
 			}
